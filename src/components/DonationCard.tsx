@@ -1,6 +1,7 @@
 import { Donation, DONATION_TYPE_CONFIG } from '@/types';
 import { timeAgo } from '@/lib/helpers';
 import ContactButtons from './ContactButtons';
+import DirectionsButton from './DirectionsButton';
 import { MapPin, Clock } from 'lucide-react';
 
 interface DonationCardProps {
@@ -27,6 +28,10 @@ const DonationCard = ({ donation }: DonationCardProps) => {
         </span>
       </div>
 
+      {donation.description && (
+        <p className="text-sm text-muted-foreground">{donation.description}</p>
+      )}
+
       <div className="space-y-1.5 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <MapPin className="w-3.5 h-3.5 shrink-0" />
@@ -38,7 +43,10 @@ const DonationCard = ({ donation }: DonationCardProps) => {
         </div>
       </div>
 
-      <ContactButtons phone={donation.phone} />
+      <div className="flex items-center gap-2">
+        <ContactButtons phone={donation.phone} />
+        <DirectionsButton lat={donation.lat} lng={donation.lng} />
+      </div>
     </div>
   );
 };
