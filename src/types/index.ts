@@ -30,6 +30,7 @@ export type HelpType =
 export interface HelpRequest {
   id: string;
   type: HelpType;
+  description?: string;
   name?: string;
   phone: string;
   lat: number;
@@ -52,6 +53,7 @@ export type DonationType =
 export interface Donation {
   id: string;
   type: DonationType;
+  description?: string;
   isNgo: boolean;
   name?: string;
   phone: string;

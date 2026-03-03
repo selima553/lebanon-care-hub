@@ -1,6 +1,7 @@
 import { Shelter, SHELTER_STATUS_CONFIG, ShelterStatus } from '@/types';
 import { timeAgo } from '@/lib/helpers';
 import ContactButtons from './ContactButtons';
+import DirectionsButton from './DirectionsButton';
 import StatusBadge from './StatusBadge';
 import { MapPin, Users, Clock } from 'lucide-react';
 import { useState } from 'react';
@@ -41,7 +42,6 @@ const ShelterCard = ({ shelter }: ShelterCardProps) => {
         </div>
       </div>
 
-      {/* Community Status Update */}
       {shelter.communityStatus && (
         <div className="bg-muted rounded-lg p-2.5 text-sm">
           <div className="flex items-center gap-2">
@@ -57,7 +57,10 @@ const ShelterCard = ({ shelter }: ShelterCardProps) => {
       )}
 
       <div className="flex items-center justify-between pt-1">
-        <ContactButtons phone={shelter.phone} />
+        <div className="flex items-center gap-2">
+          <ContactButtons phone={shelter.phone} />
+          <DirectionsButton lat={shelter.lat} lng={shelter.lng} />
+        </div>
         <button
           onClick={() => setShowStatusUpdate(!showStatusUpdate)}
           className="text-xs text-primary font-medium hover:underline"

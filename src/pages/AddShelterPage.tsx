@@ -5,6 +5,7 @@ import { ShelterStatus, SHELTER_STATUS_CONFIG } from '@/types';
 import { generateId } from '@/lib/helpers';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import LocationPicker from '@/components/LocationPicker';
 
 const AddShelterPage = () => {
   const navigate = useNavigate();
@@ -16,11 +17,17 @@ const AddShelterPage = () => {
   const [phone, setPhone] = useState('');
   const [capacity, setCapacity] = useState('');
   const [status, setStatus] = useState<ShelterStatus>('available');
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !address || !phone || !capacity) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+    if (!lat || !lng) {
+      toast.error('Please select a location on the map');
       return;
     }
     addShelter({
@@ -29,8 +36,8 @@ const AddShelterPage = () => {
       description: description || undefined,
       address,
       phone,
-      lat: 33.89 + Math.random() * 0.1,
-      lng: 35.50 + Math.random() * 0.1,
+      lat,
+      lng,
       capacity: parseInt(capacity),
       status,
       createdAt: new Date().toISOString(),
@@ -54,82 +61,57 @@ const AddShelterPage = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Name *</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)}
             className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            placeholder="Shelter name"
-          />
+            placeholder="Shelter name" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)}
             className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[80px]"
-            placeholder="Brief description of the shelter..."
-          />
+            placeholder="Brief description of the shelter..." />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Full Address *</label>
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+          <input type="text" value={address} onChange={(e) => setAddress(e.target.value)}
             className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            placeholder="Street, City, Region"
-          />
+            placeholder="Street, City, Region" />
         </div>
+
+        <LocationPicker lat={lat} lng={lng} onLocationChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }} />
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Phone Number *</label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
             className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            placeholder="+961 ..."
-          />
+            placeholder="+961 ..." />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Capacity *</label>
-          <input
-            type="number"
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
+          <input type="number" value={capacity} onChange={(e) => setCapacity(e.target.value)}
             className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            placeholder="Number of people"
-          />
+            placeholder="Number of people" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Status *</label>
           <div className="flex gap-2">
             {(Object.keys(SHELTER_STATUS_CONFIG) as ShelterStatus[]).map((s) => (
-              <button
-                type="button"
-                key={s}
-                onClick={() => setStatus(s)}
+              <button type="button" key={s} onClick={() => setStatus(s)}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  status === s
-                    ? `${SHELTER_STATUS_CONFIG[s].className} shadow-md`
-                    : 'bg-muted text-muted-foreground hover:bg-accent'
-                }`}
-              >
+                  status === s ? `${SHELTER_STATUS_CONFIG[s].className} shadow-md` : 'bg-muted text-muted-foreground hover:bg-accent'
+                }`}>
                 {SHELTER_STATUS_CONFIG[s].label}
               </button>
             ))}
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity"
-        >
+        <button type="submit"
+          className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity">
           Add Shelter
         </button>
       </form>
