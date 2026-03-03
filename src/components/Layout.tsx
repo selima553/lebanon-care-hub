@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, HandHeart, Gift, Plus } from 'lucide-react';
+import { Home, HandHeart, Gift, Plus, HeartPulse } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,6 +10,7 @@ const navItems = [
   { path: '/', label: 'Shelters', icon: Home },
   { path: '/help', label: 'Help Needed', icon: HandHeart },
   { path: '/donations', label: 'Donations', icon: Gift },
+  { path: '/trauma-support', label: 'Trauma', icon: HeartPulse },
 ];
 
 const Layout = ({ children }: LayoutProps) => {
