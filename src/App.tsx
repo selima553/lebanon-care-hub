@@ -13,6 +13,7 @@ import AddMenuPage from "@/pages/AddMenuPage";
 import AddShelterPage from "@/pages/AddShelterPage";
 import RequestHelpPage from "@/pages/RequestHelpPage";
 import ShareDonationPage from "@/pages/ShareDonationPage";
+import TraumaSupportPage from "@/pages/TraumaSupportPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/shelters/map" element={<SheltersMapPage />} />
               <Route path="/help" element={<HelpPage />} />
               <Route path="/donations" element={<DonationsPage />} />
+              <Route path="/trauma-support" element={<TraumaSupportPage />} />
               <Route path="/add" element={<AddMenuPage />} />
               <Route path="/add/shelter" element={<AddShelterPage />} />
               <Route path="/add/help" element={<RequestHelpPage />} />
