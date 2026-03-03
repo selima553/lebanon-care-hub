@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -41,6 +41,10 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
   const [isSearching, setIsSearching] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<Array<{ displayName: string; lat: string; lon: string }>>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef<number | null>(null);
   const defaultCenter: [number, number] = [33.8938, 35.5018]; // Beirut
 
   const getCurrentLocation = () => {
@@ -63,6 +67,60 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
     );
   };
 
+  useEffect(() => {
+    const query = searchQuery.trim();
+
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+    }
+
+    if (query.length < 2) {
+      setSuggestions([]);
+      setIsLoadingSuggestions(false);
+      return;
+    }
+
+    debounceRef.current = window.setTimeout(async () => {
+      setIsLoadingSuggestions(true);
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=lb&q=${encodeURIComponent(query)}`
+        );
+
+        if (!response.ok) {
+          throw new Error('Autocomplete failed');
+        }
+
+        const results = (await response.json()) as Array<{ display_name: string; lat: string; lon: string }>;
+        setSuggestions(
+          results.map((result) => ({
+            displayName: result.display_name,
+            lat: result.lat,
+            lon: result.lon,
+          }))
+        );
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        window.clearTimeout(debounceRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  const selectSuggestion = (suggestion: { displayName: string; lat: string; lon: string }) => {
+    setSearchQuery(suggestion.displayName);
+    setShowSuggestions(false);
+    setSuggestions([]);
+    onLocationChange(parseFloat(suggestion.lat), parseFloat(suggestion.lon));
+    toast.success('Location selected');
+  };
+
   const searchLocation = async () => {
     const query = searchQuery.trim();
     if (!query) {
@@ -74,7 +132,7 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=lb&q=${encodeURIComponent(query)}`
       );
 
       if (!response.ok) {
@@ -90,7 +148,9 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
       }
 
       onLocationChange(parseFloat(firstResult.lat), parseFloat(firstResult.lon));
-      toast.success('Google map location selected');
+      setShowSuggestions(false);
+      setSuggestions([]);
+      toast.success('Location selected');
     } catch {
       toast.error('Unable to search for location right now');
     } finally {
@@ -107,11 +167,21 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
         Google Map Location *
       </label>
 
-      <div className="flex gap-2">
+      <div className="relative">
+        <div className="flex gap-2">
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setShowSuggestions(true);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => {
+            window.setTimeout(() => {
+              setShowSuggestions(false);
+            }, 120);
+          }}
           placeholder="Search location for directions"
           className="flex-1 px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
@@ -124,6 +194,31 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
           {isSearching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
           Search
         </button>
+        </div>
+
+        {showSuggestions && (searchQuery.trim().length >= 2 || isLoadingSuggestions) && (
+          <div className="absolute z-[1200] mt-1 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+            {isLoadingSuggestions ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground">Searching Lebanon locations...</div>
+            ) : suggestions.length > 0 ? (
+              <ul className="max-h-52 overflow-y-auto">
+                {suggestions.map((suggestion) => (
+                  <li key={`${suggestion.lat}-${suggestion.lon}-${suggestion.displayName}`}>
+                    <button
+                      type="button"
+                      onMouseDown={() => selectSuggestion(suggestion)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent"
+                    >
+                      {suggestion.displayName}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="px-3 py-2 text-sm text-muted-foreground">No Lebanon locations found.</div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2">
