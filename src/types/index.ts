@@ -9,6 +9,9 @@ export interface Shelter {
   lat: number;
   lng: number;
   capacity: number;
+  pricing: 'free' | 'paid';
+  priceAmount?: number;
+  creatorId?: string;
   status: ShelterStatus;
   communityStatus?: ShelterStatus;
   communityStatusComment?: string;
@@ -92,5 +95,5 @@ export const DONATION_TYPE_CONFIG: Record<DonationType, { emoji: string; label: 
 export const SHELTER_STATUS_CONFIG: Record<ShelterStatus, { label: string; className: string }> = {
   available: { label: 'Available', className: 'status-available' },
   limited: { label: 'Limited', className: 'status-limited' },
-  full: { label: 'Full', className: 'status-full' },
+  full: { label: 'Not Available', className: 'status-full' },
 };
