@@ -99,10 +99,10 @@ const ShareDonationPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Location / Address *</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Full Address Details *</label>
           <input type="text" value={address} onChange={(e) => setAddress(e.target.value)}
             className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            placeholder="Pickup or delivery location" />
+            placeholder="Street, building, floor, city, region" />
         </div>
 
         <LocationPicker lat={lat} lng={lng} onLocationChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }} />
