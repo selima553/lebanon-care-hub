@@ -11,6 +11,7 @@ export interface Shelter {
   capacity: number;
   status: ShelterStatus;
   communityStatus?: ShelterStatus;
+  communityStatusComment?: string;
   communityStatusUpdatedAt?: string;
   createdAt: string;
 }
