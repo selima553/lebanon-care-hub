@@ -10,7 +10,7 @@ const navItems = [
   { path: '/', label: 'Shelters', icon: Home },
   { path: '/help', label: 'Help Needed', icon: HandHeart },
   { path: '/donations', label: 'Donations', icon: Gift },
-  { path: '/trauma-support', label: 'Trauma', icon: HeartPulse },
+  { path: '/trauma-support', label: 'Mental Support', icon: HeartPulse },
 ];
 
 const Layout = ({ children }: LayoutProps) => {

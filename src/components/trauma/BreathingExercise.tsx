@@ -67,11 +67,6 @@ const BreathingExercise = () => {
     return () => clearInterval(tick);
   }, [isRunning, phases]);
 
-  const handleReset = () => {
-    setIsRunning(false);
-    setPhaseIndex(0);
-    setRemaining(phases[0].duration);
-  };
 
   const phaseProgress = ((activePhase.duration - remaining) / activePhase.duration) * 100;
   const circleScale = activePhase.key.startsWith('inhale')
@@ -120,11 +115,8 @@ const BreathingExercise = () => {
         </p>
 
         <div className="flex gap-2 justify-center">
-          <Button onClick={() => setIsRunning((v) => !v)} aria-label={isRunning ? 'Pause breathing timer' : 'Start breathing timer'}>
-            {isRunning ? 'Pause' : 'Start'}
-          </Button>
-          <Button variant="outline" onClick={handleReset} aria-label="Reset breathing timer">
-            Reset
+          <Button onClick={() => setIsRunning((v) => !v)} aria-label={isRunning ? 'Stop breathing timer' : 'Start breathing timer'}>
+            {isRunning ? 'Stop' : 'Start'}
           </Button>
         </div>
       </CardContent>
