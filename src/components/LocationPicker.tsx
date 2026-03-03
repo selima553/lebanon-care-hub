@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Loader2, Locate, MapPin, Navigation, Search } from 'lucide-react';
+import { Loader2, Locate, MapPin, Navigation } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Fix default marker icon
@@ -18,6 +18,16 @@ interface LocationPickerProps {
   lng: number | null;
   onLocationChange: (lat: number, lng: number) => void;
 }
+
+interface LocationSuggestion {
+  title: string;
+  subtitle: string;
+  lat: string;
+  lon: string;
+  displayName: string;
+}
+
+const LEBANON_VIEWBOX = '35.1,34.7,36.7,33.0';
 
 const MapClickHandler = ({ onLocationChange }: { onLocationChange: (lat: number, lng: number) => void }) => {
   useMapEvents({
@@ -36,11 +46,30 @@ const FlyToLocation = ({ lat, lng }: { lat: number; lng: number }) => {
   return null;
 };
 
+const toSuggestion = (displayName: string, lat: string, lon: string): LocationSuggestion => {
+  const parts = displayName.split(',').map((part) => part.trim()).filter(Boolean);
+  const title = parts[0] ?? displayName;
+  const subtitle = parts.slice(1).join(', ');
+
+  return {
+    title,
+    subtitle,
+    lat,
+    lon,
+    displayName,
+  };
+};
+
 const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => {
   const [isLocating, setIsLocating] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isCurrentLocationActive, setIsCurrentLocationActive] = useState(false);
+  const debounceRef = useRef<number | null>(null);
+  const currentLocationStateTimeoutRef = useRef<number | null>(null);
   const defaultCenter: [number, number] = [33.8938, 35.5018]; // Beirut
 
   const getCurrentLocation = () => {
@@ -54,48 +83,91 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
       (pos) => {
         onLocationChange(pos.coords.latitude, pos.coords.longitude);
         setIsLocating(false);
+        setIsCurrentLocationActive(true);
+        setShowSuggestions(false);
+        setSuggestions([]);
+        toast.success('Current location selected');
+
+        if (currentLocationStateTimeoutRef.current) {
+          window.clearTimeout(currentLocationStateTimeoutRef.current);
+        }
+
+        currentLocationStateTimeoutRef.current = window.setTimeout(() => {
+          setIsCurrentLocationActive(false);
+        }, 2500);
       },
       () => {
         toast.error('Could not get your current location');
         setIsLocating(false);
+        setIsCurrentLocationActive(false);
       },
       { enableHighAccuracy: true }
     );
   };
 
-  const searchLocation = async () => {
+  useEffect(() => {
     const query = searchQuery.trim();
-    if (!query) {
-      toast.error('Please enter a location to search');
+
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+    }
+
+    if (query.length < 2) {
+      setSuggestions([]);
+      setIsLoadingSuggestions(false);
       return;
     }
 
-    setIsSearching(true);
+    debounceRef.current = window.setTimeout(async () => {
+      setIsLoadingSuggestions(true);
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&countrycodes=lb&bounded=1&viewbox=${LEBANON_VIEWBOX}&q=${encodeURIComponent(query)}`
+        );
 
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`
-      );
+        if (!response.ok) {
+          throw new Error('Autocomplete failed');
+        }
 
-      if (!response.ok) {
-        throw new Error('Search failed');
+        const results = (await response.json()) as Array<{ display_name: string; lat: string; lon: string }>;
+        const uniqueByDisplayName = new Map<string, LocationSuggestion>();
+
+        results.forEach((result) => {
+          if (!uniqueByDisplayName.has(result.display_name)) {
+            uniqueByDisplayName.set(result.display_name, toSuggestion(result.display_name, result.lat, result.lon));
+          }
+        });
+
+        setSuggestions(Array.from(uniqueByDisplayName.values()));
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setIsLoadingSuggestions(false);
       }
+    }, 250);
 
-      const results = (await response.json()) as Array<{ lat: string; lon: string }>;
-      const firstResult = results[0];
-
-      if (!firstResult) {
-        toast.error('No location found. Try a more specific search term.');
-        return;
+    return () => {
+      if (debounceRef.current) {
+        window.clearTimeout(debounceRef.current);
       }
+    };
+  }, [searchQuery]);
 
-      onLocationChange(parseFloat(firstResult.lat), parseFloat(firstResult.lon));
-      toast.success('Google map location selected');
-    } catch {
-      toast.error('Unable to search for location right now');
-    } finally {
-      setIsSearching(false);
-    }
+  useEffect(() => {
+    return () => {
+      if (currentLocationStateTimeoutRef.current) {
+        window.clearTimeout(currentLocationStateTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const selectSuggestion = (suggestion: LocationSuggestion) => {
+    setSearchQuery(suggestion.displayName);
+    setShowSuggestions(false);
+    setSuggestions([]);
+    setIsCurrentLocationActive(false);
+    onLocationChange(parseFloat(suggestion.lat), parseFloat(suggestion.lon));
+    toast.success('Location selected');
   };
 
   const center: [number, number] = lat && lng ? [lat, lng] : defaultCenter;
@@ -107,23 +179,54 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
         Google Map Location *
       </label>
 
-      <div className="flex gap-2">
+      <div className="relative">
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search location for directions"
-          className="flex-1 px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setShowSuggestions(true);
+            setIsCurrentLocationActive(false);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => {
+            window.setTimeout(() => {
+              setShowSuggestions(false);
+            }, 120);
+          }}
+          placeholder="Search in Lebanon (city, street, area...)"
+          className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
-        <button
-          type="button"
-          onClick={searchLocation}
-          disabled={isSearching}
-          className="px-3 py-2.5 rounded-xl text-sm font-medium bg-secondary text-secondary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 inline-flex items-center gap-1"
-        >
-          {isSearching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-          Search
-        </button>
+
+        {showSuggestions && (searchQuery.trim().length >= 2 || isLoadingSuggestions) && (
+          <div className="absolute z-[1200] mt-1 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+            {isLoadingSuggestions ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground inline-flex items-center gap-2">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Searching Lebanon locations...
+              </div>
+            ) : suggestions.length > 0 ? (
+              <ul className="max-h-60 overflow-y-auto">
+                {suggestions.map((suggestion) => (
+                  <li key={`${suggestion.lat}-${suggestion.lon}-${suggestion.displayName}`}>
+                    <button
+                      type="button"
+                      onMouseDown={() => selectSuggestion(suggestion)}
+                      className="w-full text-left px-3 py-2 hover:bg-accent"
+                    >
+                      <p className="text-sm text-foreground leading-tight">{suggestion.title}</p>
+                      {suggestion.subtitle && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{suggestion.subtitle}</p>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="px-3 py-2 text-sm text-muted-foreground">No Lebanon locations found.</div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2">
@@ -131,10 +234,14 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
           type="button"
           onClick={getCurrentLocation}
           disabled={isLocating}
-          className="flex-1 flex items-center justify-center gap-1 text-xs py-2 rounded-xl border border-border hover:bg-accent disabled:opacity-50"
+          className={`flex-1 flex items-center justify-center gap-1 text-xs py-2 rounded-xl border transition-colors disabled:opacity-50 ${
+            isCurrentLocationActive
+              ? 'border-green-500 bg-green-50 text-green-700'
+              : 'border-border hover:bg-accent'
+          }`}
         >
           <Locate className="w-3.5 h-3.5" />
-          {isLocating ? 'Locating...' : 'Use My Current Location'}
+          {isLocating ? 'Locating...' : isCurrentLocationActive ? 'Current Location Activated ✓' : 'Use My Current Location'}
         </button>
 
         <button
