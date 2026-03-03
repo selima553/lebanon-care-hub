@@ -9,7 +9,7 @@ interface AppContextType {
   addShelter: (shelter: Shelter) => void;
   addHelpRequest: (req: HelpRequest) => void;
   addDonation: (donation: Donation) => void;
-  updateShelterCommunityStatus: (id: string, status: Shelter['status']) => void;
+  updateShelterCommunityStatus: (id: string, status: Shelter['status'], comment?: string) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -29,11 +29,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addHelpRequest = (req: HelpRequest) => setHelpRequests(prev => [req, ...prev]);
   const addDonation = (donation: Donation) => setDonations(prev => [donation, ...prev]);
 
-  const updateShelterCommunityStatus = (id: string, status: Shelter['status']) => {
+  const updateShelterCommunityStatus = (id: string, status: Shelter['status'], comment?: string) => {
     setShelters(prev =>
       prev.map(s =>
         s.id === id
-          ? { ...s, communityStatus: status, communityStatusUpdatedAt: new Date().toISOString() }
+          ? {
+              ...s,
+              communityStatus: status,
+              communityStatusComment: comment?.trim() || undefined,
+              communityStatusUpdatedAt: new Date().toISOString(),
+            }
           : s
       )
     );
