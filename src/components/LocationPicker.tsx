@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { CheckCircle2, Loader2, Locate, MapPin, Navigation } from 'lucide-react';
+import { CheckCircle2, Loader2, Locate, MapPin, MapPinned, Navigation } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Fix default marker icon
@@ -43,6 +43,14 @@ const FlyToLocation = ({ lat, lng }: { lat: number; lng: number }) => {
   return null;
 };
 
+const splitAddress = (displayName: string) => {
+  const [primary, ...rest] = displayName.split(',').map((part) => part.trim());
+  return {
+    primary,
+    secondary: rest.join(', '),
+  };
+};
+
 const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => {
   const [isLocating, setIsLocating] = useState(false);
   const [locationPicked, setLocationPicked] = useState(false);
@@ -50,11 +58,20 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [skipNextSearch, setSkipNextSearch] = useState(false);
   const defaultCenter: [number, number] = [33.8938, 35.5018]; // Beirut
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    const query = searchQuery.trim();
+
+    if (!query) {
       setSearchResults([]);
+      return;
+    }
+
+    if (skipNextSearch) {
+      setSkipNextSearch(false);
       return;
     }
 
@@ -63,7 +80,7 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
 
       try {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(searchQuery.trim())}`
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&countrycodes=lb&accept-language=en&q=${encodeURIComponent(query)}`
         );
 
         if (!response.ok) {
@@ -77,10 +94,10 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
       } finally {
         setIsSearching(false);
       }
-    }, 350);
+    }, 250);
 
     return () => clearTimeout(timeout);
-  }, [searchQuery]);
+  }, [searchQuery, skipNextSearch]);
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -112,12 +129,15 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
 
   const handleResultSelect = (result: SearchResult) => {
     onLocationChange(parseFloat(result.lat), parseFloat(result.lon));
+    setSkipNextSearch(true);
     setSearchQuery(result.display_name);
     setSearchResults([]);
+    setIsInputFocused(false);
     toast.success('Google map location selected');
   };
 
   const center: [number, number] = lat && lng ? [lat, lng] : defaultCenter;
+  const showSuggestions = isInputFocused && (isSearching || searchResults.length > 0);
 
   return (
     <div className="space-y-3">
@@ -131,27 +151,41 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search location for directions"
+          onFocus={() => setIsInputFocused(true)}
+          onBlur={() => {
+            setTimeout(() => setIsInputFocused(false), 150);
+          }}
+          placeholder="Search location in Lebanon for directions"
           className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
 
-        {(isSearching || searchResults.length > 0) && (
+        {showSuggestions && (
           <div className="absolute z-[1000] mt-1 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden">
             {isSearching ? (
               <p className="px-3 py-2 text-xs text-muted-foreground flex items-center gap-2">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Searching locations...
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Searching in Lebanon...
               </p>
             ) : (
-              searchResults.map((result) => (
-                <button
-                  key={result.place_id}
-                  type="button"
-                  onClick={() => handleResultSelect(result)}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-accent transition-colors border-b border-border last:border-b-0"
-                >
-                  {result.display_name}
-                </button>
-              ))
+              searchResults.map((result) => {
+                const { primary, secondary } = splitAddress(result.display_name);
+
+                return (
+                  <button
+                    key={result.place_id}
+                    type="button"
+                    onClick={() => handleResultSelect(result)}
+                    className="w-full text-left px-3 py-2.5 hover:bg-accent transition-colors border-b border-border last:border-b-0"
+                  >
+                    <span className="flex items-start gap-2">
+                      <MapPinned className="w-3.5 h-3.5 mt-0.5 text-primary shrink-0" />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-foreground truncate">{primary}</span>
+                        {secondary && <span className="block text-xs text-muted-foreground truncate">{secondary}</span>}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })
             )}
           </div>
         )}
@@ -170,7 +204,13 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
                 : 'border-border hover:bg-accent'
           }`}
         >
-          {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : locationPicked ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Locate className="w-3.5 h-3.5" />}
+          {isLocating ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : locationPicked ? (
+            <CheckCircle2 className="w-3.5 h-3.5" />
+          ) : (
+            <Locate className="w-3.5 h-3.5" />
+          )}
           {isLocating ? 'Getting your location...' : locationPicked ? 'Location Selected' : 'Use My Current Location'}
         </button>
 
