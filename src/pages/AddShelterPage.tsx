@@ -50,7 +50,7 @@ const AddShelterPage = () => {
     setLng(editingShelter.lng);
   }, [editingShelter]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !address || !phone) {
       toast.error('Please fill in all required fields');
@@ -62,7 +62,7 @@ const AddShelterPage = () => {
     }
 
     if (editingShelter) {
-      updateShelter(editingShelter.id, {
+      const updated = await updateShelter(editingShelter.id, {
         name,
         description: description || undefined,
         address,
@@ -74,6 +74,10 @@ const AddShelterPage = () => {
         priceAmount: pricing === 'paid' ? parseFloat(priceAmount) : undefined,
         status,
       });
+      if (!updated) {
+        toast.error('Could not update shelter. Please try again.');
+        return;
+      }
       toast.success('Shelter updated successfully!');
       navigate('/my-shelters');
       return;
@@ -83,7 +87,7 @@ const AddShelterPage = () => {
     const creatorId = getCreatorId();
     const createdIds = JSON.parse(localStorage.getItem(CREATED_SHELTERS_KEY) || '[]') as string[];
 
-    addShelter({
+    const added = await addShelter({
       id: newId,
       name,
       description: description || undefined,
@@ -98,6 +102,11 @@ const AddShelterPage = () => {
       createdAt: new Date().toISOString(),
       creatorId,
     });
+
+    if (!added) {
+      toast.error('Could not add shelter. Please try again.');
+      return;
+    }
 
     localStorage.setItem(CREATED_SHELTERS_KEY, JSON.stringify([newId, ...createdIds]));
 

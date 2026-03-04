@@ -7,6 +7,7 @@ import { MapPin, Users, Clock, BadgeDollarSign, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { useAppData } from '@/context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface ShelterCardProps {
   shelter: Shelter;
@@ -19,8 +20,12 @@ const ShelterCard = ({ shelter, showEdit = false }: ShelterCardProps) => {
   const [showStatusUpdate, setShowStatusUpdate] = useState(false);
   const [statusComment, setStatusComment] = useState('');
 
-  const handleStatusUpdate = (status: ShelterStatus) => {
-    updateShelterCommunityStatus(shelter.id, status, statusComment);
+  const handleStatusUpdate = async (status: ShelterStatus) => {
+    const updated = await updateShelterCommunityStatus(shelter.id, status, statusComment);
+    if (!updated) {
+      toast.error('Could not update shelter status. Please try again.');
+      return;
+    }
     setShowStatusUpdate(false);
     setStatusComment('');
   };

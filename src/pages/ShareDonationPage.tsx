@@ -20,13 +20,13 @@ const ShareDonationPage = () => {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone || !address) {
       toast.error('Please fill in required fields');
       return;
     }
-    addDonation({
+    const created = await addDonation({
       id: generateId(),
       type,
       description: description || undefined,
@@ -38,6 +38,10 @@ const ShareDonationPage = () => {
       address,
       createdAt: new Date().toISOString(),
     });
+    if (!created) {
+      toast.error('Could not post donation. Please try again.');
+      return;
+    }
     toast.success('Donation offer posted!');
     navigate('/donations');
   };
