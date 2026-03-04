@@ -121,11 +121,11 @@
   }
 }
 
-.google-translate-wrapper {
+.language-toggle-wrapper {
   position: relative;
 }
 
-.google-translate-toggle {
+.language-toggle-button {
   border-radius: 0.5rem;
   border: none;
   padding: 0.25rem 0.55rem;
@@ -137,32 +137,15 @@
   transition: background-color 0.2s ease;
 }
 
-.google-translate-toggle:hover {
+.language-toggle-button:hover {
   background-color: rgba(255, 255, 255, 0.25);
 }
 
-.google-translate-toggle:focus-visible {
+.language-toggle-button:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.45);
   outline-offset: 1px;
 }
 
-.google-translate-widget {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.google-translate-widget .goog-te-gadget,
-.google-translate-widget .goog-te-combo,
-.google-translate-widget .goog-logo-link,
-.google-translate-widget .goog-te-gadget span {
-  display: none !important;
-}
-
-.goog-te-banner-frame.skiptranslate {
-  display: none !important;
-}
-
-body {
-  top: 0 !important;
+body.rtl {
+  direction: rtl;
 }
