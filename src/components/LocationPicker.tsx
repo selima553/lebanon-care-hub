@@ -22,12 +22,13 @@ interface LocationPickerProps {
 interface LocationSuggestion {
   title: string;
   subtitle: string;
-  lat: string;
-  lon: string;
+  lat: number;
+  lon: number;
   displayName: string;
 }
 
-const LEBANON_VIEWBOX = '35.1,34.7,36.7,33.0';
+const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+const LEBANON_BBOX = '35.1,33.0,36.7,34.7';
 
 const MapClickHandler = ({ onLocationChange }: { onLocationChange: (lat: number, lng: number) => void }) => {
   useMapEvents({
@@ -46,13 +47,9 @@ const FlyToLocation = ({ lat, lng }: { lat: number; lng: number }) => {
   return null;
 };
 
-const toSuggestion = (displayName: string, lat: string, lon: string): LocationSuggestion => {
-  const parts = displayName.split(',').map((part) => part.trim()).filter(Boolean);
-  const title = parts[0] ?? displayName;
-  const subtitle = parts.slice(1).join(', ');
-
+const toSuggestion = (displayName: string, title: string, subtitle: string, lat: number, lon: number): LocationSuggestion => {
   return {
-    title,
+    title: title || displayName,
     subtitle,
     lat,
     lon,
@@ -118,27 +115,42 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
       return;
     }
 
+    if (!MAPBOX_ACCESS_TOKEN) {
+      setSuggestions([]);
+      setIsLoadingSuggestions(false);
+      return;
+    }
+
     debounceRef.current = window.setTimeout(async () => {
       setIsLoadingSuggestions(true);
       try {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&countrycodes=lb&bounded=1&viewbox=${LEBANON_VIEWBOX}&q=${encodeURIComponent(query)}`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+            query
+          )}.json?autocomplete=true&limit=6&country=LB&bbox=${LEBANON_BBOX}&access_token=${MAPBOX_ACCESS_TOKEN}`
         );
 
         if (!response.ok) {
           throw new Error('Autocomplete failed');
         }
 
-        const results = (await response.json()) as Array<{ display_name: string; lat: string; lon: string }>;
-        const uniqueByDisplayName = new Map<string, LocationSuggestion>();
+        const data = (await response.json()) as {
+          features?: Array<{
+            id: string;
+            text?: string;
+            place_name: string;
+            center: [number, number];
+          }>;
+        };
 
-        results.forEach((result) => {
-          if (!uniqueByDisplayName.has(result.display_name)) {
-            uniqueByDisplayName.set(result.display_name, toSuggestion(result.display_name, result.lat, result.lon));
-          }
+        const mapped = (data.features || []).map((feature) => {
+          const parts = feature.place_name.split(',').map((part) => part.trim()).filter(Boolean);
+          const title = feature.text || parts[0] || feature.place_name;
+          const subtitle = parts.slice(1).join(', ');
+          return toSuggestion(feature.place_name, title, subtitle, feature.center[1], feature.center[0]);
         });
 
-        setSuggestions(Array.from(uniqueByDisplayName.values()));
+        setSuggestions(mapped);
       } catch {
         setSuggestions([]);
       } finally {
@@ -166,7 +178,7 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
     setShowSuggestions(false);
     setSuggestions([]);
     setIsCurrentLocationActive(false);
-    onLocationChange(parseFloat(suggestion.lat), parseFloat(suggestion.lon));
+    onLocationChange(suggestion.lat, suggestion.lon);
     toast.success('Location selected');
   };
 
@@ -204,6 +216,10 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
               <div className="px-3 py-2 text-sm text-muted-foreground inline-flex items-center gap-2">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 Searching Lebanon locations...
+              </div>
+            ) : !MAPBOX_ACCESS_TOKEN ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground">
+                Mapbox autocomplete is not configured. Add <code>VITE_MAPBOX_ACCESS_TOKEN</code> to your <code>.env</code> file.
               </div>
             ) : suggestions.length > 0 ? (
               <ul className="max-h-60 overflow-y-auto">
@@ -279,7 +295,7 @@ const LocationPicker = ({ lat, lng, onLocationChange }: LocationPickerProps) => 
           📍 Selected map coordinates: {lat.toFixed(4)}, {lng.toFixed(4)}
         </p>
       )}
-      <p className="text-xs text-muted-foreground">Full address and Google map location can be different.</p>
+      <p className="text-xs text-muted-foreground">Full address and pinned map location can be different.</p>
     </div>
   );
 };

@@ -36,6 +36,19 @@ npm i
 npm run dev
 ```
 
+### Mapbox token setup (for shelter location autocomplete)
+
+Shelter create/edit location autocomplete uses Mapbox Geocoding API.
+
+1. Create a token from your Mapbox account dashboard.
+2. Add it to your local `.env` file:
+
+```sh
+VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_public_token
+```
+
+3. Restart the dev server (`npm run dev`) after updating `.env`.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).

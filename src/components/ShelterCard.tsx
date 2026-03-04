@@ -48,7 +48,7 @@ const ShelterCard = ({ shelter, showEdit = false }: ShelterCardProps) => {
         </div>
         <div className="flex items-center gap-2">
           <BadgeDollarSign className="w-3.5 h-3.5 shrink-0" />
-          <span>{shelter.pricing !== 'paid' ? 'Free shelter' : `Paid (${shelter.priceAmount ?? 0})`}</span>
+          <span>{shelter.pricing !== 'paid' ? 'Free shelter' : `Paid ($${shelter.priceAmount ?? 0})`}</span>
         </div>
         <div className="flex items-center gap-2">
           <Clock className="w-3.5 h-3.5 shrink-0" />
