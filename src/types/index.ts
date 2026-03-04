@@ -6,8 +6,8 @@ export interface Shelter {
   description?: string;
   address: string;
   phone: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   capacity: number;
   pricing: 'free' | 'paid';
   priceAmount?: number;
@@ -37,8 +37,8 @@ export interface HelpRequest {
   description?: string;
   name?: string;
   phone: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   address: string;
   createdAt: string;
 }
@@ -61,8 +61,8 @@ export interface Donation {
   isNgo: boolean;
   name?: string;
   phone: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   address: string;
   createdAt: string;
 }
