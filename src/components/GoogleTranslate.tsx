@@ -1,43 +1,17 @@
-import { useEffect, useState } from 'react';
-
-type Language = 'en' | 'ar';
-
-const STORAGE_KEY = 'preferred-language';
-
-const getInitialLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'en';
-
-  const savedLanguage = window.localStorage.getItem(STORAGE_KEY);
-  if (savedLanguage === 'ar' || savedLanguage === 'en') return savedLanguage;
-
-  return 'en';
-};
-
-const applyLanguage = (language: Language) => {
-  document.documentElement.lang = language;
-  document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-  document.body.classList.toggle('rtl', language === 'ar');
-};
+import { useLanguage } from '@/context/LanguageContext';
 
 const GoogleTranslate = () => {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(getInitialLanguage);
-
-  useEffect(() => {
-    applyLanguage(currentLanguage);
-    window.localStorage.setItem(STORAGE_KEY, currentLanguage);
-  }, [currentLanguage]);
-
-  const nextLanguage: Language = currentLanguage === 'en' ? 'ar' : 'en';
+  const { isArabic, toggleLanguage } = useLanguage();
 
   return (
     <div className="language-toggle-wrapper">
       <button
         type="button"
-        onClick={() => setCurrentLanguage(nextLanguage)}
+        onClick={toggleLanguage}
         className="language-toggle-button"
-        aria-label={`Switch website language to ${nextLanguage === 'ar' ? 'Arabic' : 'English'}`}
+        aria-label={isArabic ? 'Switch website language to English' : 'تحويل لغة الموقع إلى العربية'}
       >
-        {currentLanguage === 'en' ? 'العربية' : 'English'}
+        {isArabic ? 'English' : 'العربية'}
       </button>
     </div>
   );

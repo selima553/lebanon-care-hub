@@ -4,9 +4,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/context/LanguageContext';
 
-// Fix default marker icon
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -16,82 +15,47 @@ L.Icon.Default.mergeOptions({
 
 const SheltersMapPage = () => {
   const { shelters } = useAppData();
+  const { isArabic } = useLanguage();
   const navigate = useNavigate();
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const sheltersWithCoordinates = useMemo(
-    () => shelters.filter((shelter) => typeof shelter.lat === 'number' && typeof shelter.lng === 'number'),
-    [shelters]
-  );
+  const sheltersWithCoordinates = useMemo(() => shelters.filter((shelter) => typeof shelter.lat === 'number' && typeof shelter.lng === 'number'), [shelters]);
 
-  const center = useMemo<[number, number]>(() => {
-    if (sheltersWithCoordinates.length === 0) {
-      return [33.8938, 35.5018];
-    }
-
-    return [
-      sheltersWithCoordinates.reduce((sum, shelter) => sum + (shelter.lat ?? 0), 0) / sheltersWithCoordinates.length,
-      sheltersWithCoordinates.reduce((sum, shelter) => sum + (shelter.lng ?? 0), 0) / sheltersWithCoordinates.length,
-    ];
-  }, [sheltersWithCoordinates]);
+  const center = useMemo<[number, number]>(() => sheltersWithCoordinates.length === 0 ? [33.8938, 35.5018] : [sheltersWithCoordinates.reduce((sum, s) => sum + (s.lat ?? 0), 0) / sheltersWithCoordinates.length, sheltersWithCoordinates.reduce((sum, s) => sum + (s.lng ?? 0), 0) / sheltersWithCoordinates.length], [sheltersWithCoordinates]);
 
   useEffect(() => {
-    if (!mapContainerRef.current) {
-      return;
-    }
-
+    if (!mapContainerRef.current) return;
     if (!mapRef.current) {
-      mapRef.current = L.map(mapContainerRef.current, {
-        attributionControl: false,
-      });
-
+      mapRef.current = L.map(mapContainerRef.current, { attributionControl: false });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapRef.current);
     }
 
     const map = mapRef.current;
     map.setView(center, 9);
-
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
+    map.eachLayer((layer) => { if (layer instanceof L.Marker) map.removeLayer(layer); });
 
     sheltersWithCoordinates.forEach((shelter) => {
       const popupContent = `
-        <div style="min-width:200px; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;">
+        <div style="min-width:200px; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; direction:${isArabic ? 'rtl' : 'ltr'}; text-align:${isArabic ? 'right' : 'left'};">
           <h3 style="margin:0 0 6px; font-size:14px; font-weight:700;">${shelter.name}</h3>
           ${shelter.description ? `<p style="margin:0 0 6px; color:#6b7280; font-size:12px;">${shelter.description}</p>` : ''}
-          <p style="margin:0 0 4px; color:#6b7280; font-size:12px;">Capacity: ${shelter.capacity ?? 'unknown'}</p>
+          <p style="margin:0 0 4px; color:#6b7280; font-size:12px;">${isArabic ? 'السعة' : 'Capacity'}: ${shelter.capacity ?? (isArabic ? 'غير معروف' : 'unknown')}</p>
           <p style="margin:0 0 8px; color:#6b7280; font-size:12px;">${shelter.address}</p>
-          ${shelter.phone ? `<a href="tel:${shelter.phone}" style="font-size:12px; color:#2563eb; text-decoration:none;">Call shelter</a>` : ''}
-        </div>
-      `;
-
+          ${shelter.phone ? `<a href="tel:${shelter.phone}" style="font-size:12px; color:#2563eb; text-decoration:none;">${isArabic ? 'اتصل بالملجأ' : 'Call shelter'}</a>` : ''}
+        </div>`;
       L.marker([shelter.lat as number, shelter.lng as number]).addTo(map).bindPopup(popupContent);
     });
 
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-  }, [center, sheltersWithCoordinates]);
+    return () => { map.remove(); mapRef.current = null; };
+  }, [center, sheltersWithCoordinates, isArabic]);
 
   return (
     <div className="px-4 py-4 max-w-lg mx-auto space-y-3">
       <div className="flex items-center justify-between">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to List
-        </button>
-        <span className="text-xs text-muted-foreground">{sheltersWithCoordinates.length} pinned shelters</span>
+        <button onClick={() => navigate('/')} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft className="w-4 h-4" /> {isArabic ? 'عودة للقائمة' : 'Back to List'}</button>
+        <span className="text-xs text-muted-foreground">{sheltersWithCoordinates.length} {isArabic ? 'ملاجئ محددة' : 'pinned shelters'}</span>
       </div>
-
-      <div className="rounded-xl overflow-hidden border border-border h-[calc(100vh-220px)]">
-        <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
-      </div>
+      <div className="rounded-xl overflow-hidden border border-border h-[calc(100vh-220px)]"><div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} /></div>
     </div>
   );
 };
