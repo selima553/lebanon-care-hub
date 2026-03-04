@@ -19,13 +19,13 @@ const RequestHelpPage = () => {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone || !address) {
       toast.error('Please fill in required fields');
       return;
     }
-    addHelpRequest({
+    const created = await addHelpRequest({
       id: generateId(),
       type,
       description: description || undefined,
@@ -36,6 +36,10 @@ const RequestHelpPage = () => {
       address,
       createdAt: new Date().toISOString(),
     });
+    if (!created) {
+      toast.error('Could not post help request. Please try again.');
+      return;
+    }
     toast.success('Help request posted!');
     navigate('/help');
   };

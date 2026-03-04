@@ -14,7 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      donations: {
+        Row: {
+          address: string
+          created_at: string
+          description: string | null
+          id: string
+          is_ngo: boolean
+          lat: number | null
+          lng: number | null
+          name: string | null
+          phone: string
+          type: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          description?: string | null
+          id: string
+          is_ngo?: boolean
+          lat?: number | null
+          lng?: number | null
+          name?: string | null
+          phone: string
+          type: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_ngo?: boolean
+          lat?: number | null
+          lng?: number | null
+          name?: string | null
+          phone?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      help_requests: {
+        Row: {
+          address: string
+          created_at: string
+          description: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string | null
+          phone: string
+          type: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          description?: string | null
+          id: string
+          lat?: number | null
+          lng?: number | null
+          name?: string | null
+          phone: string
+          type: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string | null
+          phone?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      shelters: {
+        Row: {
+          address: string
+          capacity: number | null
+          community_status: string | null
+          community_status_comment: string | null
+          community_status_updated_at: string | null
+          created_at: string
+          creator_id: string | null
+          description: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string
+          phone: string
+          price_amount: number | null
+          pricing: string
+          status: string
+        }
+        Insert: {
+          address: string
+          capacity?: number | null
+          community_status?: string | null
+          community_status_comment?: string | null
+          community_status_updated_at?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          id: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          phone: string
+          price_amount?: number | null
+          pricing: string
+          status: string
+        }
+        Update: {
+          address?: string
+          capacity?: number | null
+          community_status?: string | null
+          community_status_comment?: string | null
+          community_status_updated_at?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          phone?: string
+          price_amount?: number | null
+          pricing?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
