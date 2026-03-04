@@ -102,17 +102,6 @@ const ShelterCard = ({ shelter, showEdit = false }: ShelterCardProps) => {
 
       {showStatusUpdate && (
         <div className="space-y-2 pt-1">
-          <div className="flex gap-2 flex-wrap">
-            {(Object.keys(SHELTER_STATUS_CONFIG) as ShelterStatus[]).map((s) => (
-              <button
-                key={s}
-                onClick={() => handleStatusUpdate(s)}
-                className={`${SHELTER_STATUS_CONFIG[s].className} px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity`}
-              >
-                {SHELTER_STATUS_CONFIG[s].label}
-              </button>
-            ))}
-          </div>
           <div className="space-y-1">
             <label htmlFor={`status-comment-${shelter.id}`} className="text-xs text-muted-foreground">
               Add comment (optional)
@@ -124,6 +113,17 @@ const ShelterCard = ({ shelter, showEdit = false }: ShelterCardProps) => {
               placeholder="Share additional details"
               className="w-full min-h-20 rounded-lg border border-border bg-background px-2.5 py-2 text-xs text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {(Object.keys(SHELTER_STATUS_CONFIG) as ShelterStatus[]).map((s) => (
+              <button
+                key={s}
+                onClick={() => handleStatusUpdate(s)}
+                className={`${SHELTER_STATUS_CONFIG[s].className} px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity`}
+              >
+                {SHELTER_STATUS_CONFIG[s].label}
+              </button>
+            ))}
           </div>
         </div>
       )}
