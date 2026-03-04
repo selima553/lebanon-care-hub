@@ -42,7 +42,7 @@ const AddShelterPage = () => {
     setDescription(editingShelter.description || '');
     setAddress(editingShelter.address);
     setPhone(editingShelter.phone);
-    setCapacity(String(editingShelter.capacity));
+    setCapacity(editingShelter.capacity !== null ? String(editingShelter.capacity) : '');
     setStatus(editingShelter.status);
     setPricing(editingShelter.pricing || 'free');
     setPriceAmount(editingShelter.priceAmount ? String(editingShelter.priceAmount) : '');
@@ -52,7 +52,7 @@ const AddShelterPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !address || !phone || !capacity) {
+    if (!name || !address || !phone) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -69,7 +69,7 @@ const AddShelterPage = () => {
         phone,
         lat: lat ?? undefined,
         lng: lng ?? undefined,
-        capacity: parseInt(capacity),
+        capacity: capacity ? parseInt(capacity) : null,
         pricing,
         priceAmount: pricing === 'paid' ? parseFloat(priceAmount) : undefined,
         status,
@@ -91,7 +91,7 @@ const AddShelterPage = () => {
       phone,
       lat: lat ?? undefined,
       lng: lng ?? undefined,
-      capacity: parseInt(capacity),
+      capacity: capacity ? parseInt(capacity) : null,
       pricing,
       priceAmount: pricing === 'paid' ? parseFloat(priceAmount) : undefined,
       status,
@@ -149,10 +149,10 @@ const AddShelterPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Capacity *</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Capacity</label>
           <input type="number" value={capacity} onChange={(e) => setCapacity(e.target.value)}
             className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            placeholder="Number of people" />
+            placeholder="leave empty if capacity is unknown" />
         </div>
 
         <div>

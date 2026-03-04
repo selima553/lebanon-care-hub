@@ -44,7 +44,7 @@ const ShelterCard = ({ shelter, showEdit = false }: ShelterCardProps) => {
         </div>
         <div className="flex items-center gap-2">
           <Users className="w-3.5 h-3.5 shrink-0" />
-          <span>Capacity: {shelter.capacity}</span>
+          <span>Capacity: {shelter.capacity ?? 'unknown'}</span>
         </div>
         <div className="flex items-center gap-2">
           <BadgeDollarSign className="w-3.5 h-3.5 shrink-0" />

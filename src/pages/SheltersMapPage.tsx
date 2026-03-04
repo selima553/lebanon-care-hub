@@ -62,7 +62,7 @@ const SheltersMapPage = () => {
         <div style="min-width:200px; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;">
           <h3 style="margin:0 0 6px; font-size:14px; font-weight:700;">${shelter.name}</h3>
           ${shelter.description ? `<p style="margin:0 0 6px; color:#6b7280; font-size:12px;">${shelter.description}</p>` : ''}
-          <p style="margin:0 0 4px; color:#6b7280; font-size:12px;">Capacity: ${shelter.capacity}</p>
+          <p style="margin:0 0 4px; color:#6b7280; font-size:12px;">Capacity: ${shelter.capacity ?? 'unknown'}</p>
           <p style="margin:0 0 8px; color:#6b7280; font-size:12px;">${shelter.address}</p>
           ${shelter.phone ? `<a href="tel:${shelter.phone}" style="font-size:12px; color:#2563eb; text-decoration:none;">Call shelter</a>` : ''}
         </div>
