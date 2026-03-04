@@ -26,10 +26,6 @@ const ShareDonationPage = () => {
       toast.error('Please fill in required fields');
       return;
     }
-    if (!lat || !lng) {
-      toast.error('Please select a location on the map');
-      return;
-    }
     addDonation({
       id: generateId(),
       type,
@@ -37,8 +33,8 @@ const ShareDonationPage = () => {
       isNgo,
       name: name || undefined,
       phone,
-      lat,
-      lng,
+      lat: lat ?? undefined,
+      lng: lng ?? undefined,
       address,
       createdAt: new Date().toISOString(),
     });

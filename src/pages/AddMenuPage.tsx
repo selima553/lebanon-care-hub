@@ -13,6 +13,13 @@ const AddMenuPage = () => {
       path: '/add/shelter',
     },
     {
+      icon: Pencil,
+      emoji: '✏️',
+      title: 'Edit My Shelters',
+      description: 'Manage and update the shelters you added',
+      path: '/my-shelters',
+    },
+    {
       icon: HandHeart,
       emoji: '🤝',
       title: 'Request Help',
@@ -25,13 +32,6 @@ const AddMenuPage = () => {
       title: 'Share a Donation',
       description: 'Offer donations or resources to those in need',
       path: '/add/donation',
-    },
-    {
-      icon: Pencil,
-      emoji: '✏️',
-      title: 'Edit My Shelter Places',
-      description: 'Manage and update the shelters you added',
-      path: '/my-shelters',
     },
   ];
 

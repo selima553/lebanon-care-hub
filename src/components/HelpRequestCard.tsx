@@ -44,7 +44,7 @@ const HelpRequestCard = ({ request }: HelpRequestCardProps) => {
 
       <div className="flex items-center gap-2">
         <ContactButtons phone={request.phone} />
-        <DirectionsButton lat={request.lat} lng={request.lng} />
+        <DirectionsButton address={request.address} lat={request.lat} lng={request.lng} />
       </div>
     </div>
   );

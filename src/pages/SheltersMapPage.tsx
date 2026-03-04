@@ -19,17 +19,21 @@ const SheltersMapPage = () => {
   const navigate = useNavigate();
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const sheltersWithCoordinates = useMemo(
+    () => shelters.filter((shelter) => typeof shelter.lat === 'number' && typeof shelter.lng === 'number'),
+    [shelters]
+  );
 
   const center = useMemo<[number, number]>(() => {
-    if (shelters.length === 0) {
+    if (sheltersWithCoordinates.length === 0) {
       return [33.8938, 35.5018];
     }
 
     return [
-      shelters.reduce((sum, shelter) => sum + shelter.lat, 0) / shelters.length,
-      shelters.reduce((sum, shelter) => sum + shelter.lng, 0) / shelters.length,
+      sheltersWithCoordinates.reduce((sum, shelter) => sum + (shelter.lat ?? 0), 0) / sheltersWithCoordinates.length,
+      sheltersWithCoordinates.reduce((sum, shelter) => sum + (shelter.lng ?? 0), 0) / sheltersWithCoordinates.length,
     ];
-  }, [shelters]);
+  }, [sheltersWithCoordinates]);
 
   useEffect(() => {
     if (!mapContainerRef.current) {
@@ -53,7 +57,7 @@ const SheltersMapPage = () => {
       }
     });
 
-    shelters.forEach((shelter) => {
+    sheltersWithCoordinates.forEach((shelter) => {
       const popupContent = `
         <div style="min-width:200px; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;">
           <h3 style="margin:0 0 6px; font-size:14px; font-weight:700;">${shelter.name}</h3>
@@ -64,14 +68,14 @@ const SheltersMapPage = () => {
         </div>
       `;
 
-      L.marker([shelter.lat, shelter.lng]).addTo(map).bindPopup(popupContent);
+      L.marker([shelter.lat as number, shelter.lng as number]).addTo(map).bindPopup(popupContent);
     });
 
     return () => {
       map.remove();
       mapRef.current = null;
     };
-  }, [center, shelters]);
+  }, [center, sheltersWithCoordinates]);
 
   return (
     <div className="px-4 py-4 max-w-lg mx-auto space-y-3">
@@ -82,7 +86,7 @@ const SheltersMapPage = () => {
         >
           <ArrowLeft className="w-4 h-4" /> Back to List
         </button>
-        <span className="text-xs text-muted-foreground">{shelters.length} shelters</span>
+        <span className="text-xs text-muted-foreground">{sheltersWithCoordinates.length} pinned shelters</span>
       </div>
 
       <div className="rounded-xl overflow-hidden border border-border h-[calc(100vh-220px)]">

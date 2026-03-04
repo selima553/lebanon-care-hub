@@ -25,18 +25,14 @@ const RequestHelpPage = () => {
       toast.error('Please fill in required fields');
       return;
     }
-    if (!lat || !lng) {
-      toast.error('Please select a location on the map');
-      return;
-    }
     addHelpRequest({
       id: generateId(),
       type,
       description: description || undefined,
       name: name || undefined,
       phone,
-      lat,
-      lng,
+      lat: lat ?? undefined,
+      lng: lng ?? undefined,
       address,
       createdAt: new Date().toISOString(),
     });

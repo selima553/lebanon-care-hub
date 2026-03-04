@@ -48,7 +48,7 @@ const ShelterCard = ({ shelter, showEdit = false }: ShelterCardProps) => {
         </div>
         <div className="flex items-center gap-2">
           <BadgeDollarSign className="w-3.5 h-3.5 shrink-0" />
-          <span>{shelter.pricing !== 'paid' ? 'Free shelter' : `Paid (${shelter.priceAmount ?? 0})`}</span>
+          <span>{shelter.pricing !== 'paid' ? 'Free shelter' : `Paid ($${shelter.priceAmount ?? 0})`}</span>
         </div>
         <div className="flex items-center gap-2">
           <Clock className="w-3.5 h-3.5 shrink-0" />
@@ -76,7 +76,7 @@ const ShelterCard = ({ shelter, showEdit = false }: ShelterCardProps) => {
       <div className="pt-1 space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
           <ContactButtons phone={shelter.phone} />
-          <DirectionsButton lat={shelter.lat} lng={shelter.lng} />
+          <DirectionsButton address={shelter.address} lat={shelter.lat} lng={shelter.lng} />
           {showEdit && (
             <button
               onClick={() => navigate(`/add/shelter/${shelter.id}`)}

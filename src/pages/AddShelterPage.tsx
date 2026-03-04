@@ -56,10 +56,6 @@ const AddShelterPage = () => {
       toast.error('Please fill in all required fields');
       return;
     }
-    if (!lat || !lng) {
-      toast.error('Please select a location on the map');
-      return;
-    }
     if (pricing === 'paid' && !priceAmount) {
       toast.error('Please add the amount for paid shelters');
       return;
@@ -71,8 +67,8 @@ const AddShelterPage = () => {
         description: description || undefined,
         address,
         phone,
-        lat,
-        lng,
+        lat: lat ?? undefined,
+        lng: lng ?? undefined,
         capacity: parseInt(capacity),
         pricing,
         priceAmount: pricing === 'paid' ? parseFloat(priceAmount) : undefined,
@@ -93,8 +89,8 @@ const AddShelterPage = () => {
       description: description || undefined,
       address,
       phone,
-      lat,
-      lng,
+      lat: lat ?? undefined,
+      lng: lng ?? undefined,
       capacity: parseInt(capacity),
       pricing,
       priceAmount: pricing === 'paid' ? parseFloat(priceAmount) : undefined,

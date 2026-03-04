@@ -1,12 +1,16 @@
 import { Navigation } from 'lucide-react';
 
 interface DirectionsButtonProps {
-  lat: number;
-  lng: number;
+  address: string;
+  lat?: number;
+  lng?: number;
 }
 
-const DirectionsButton = ({ lat, lng }: DirectionsButtonProps) => {
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+const DirectionsButton = ({ address, lat, lng }: DirectionsButtonProps) => {
+  const hasCoordinates = typeof lat === 'number' && typeof lng === 'number';
+  const url = hasCoordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
   return (
     <a

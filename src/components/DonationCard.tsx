@@ -45,7 +45,7 @@ const DonationCard = ({ donation }: DonationCardProps) => {
 
       <div className="flex items-center gap-2">
         <ContactButtons phone={donation.phone} />
-        <DirectionsButton lat={donation.lat} lng={donation.lng} />
+        <DirectionsButton address={donation.address} lat={donation.lat} lng={donation.lng} />
       </div>
     </div>
   );
