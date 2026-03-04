@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, HandHeart, Gift, Plus, HeartPulse } from 'lucide-react';
+import GoogleTranslate from './GoogleTranslate';
 
 interface LayoutProps {
   children: ReactNode;
@@ -20,10 +21,11 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Header */}
-      <header className="emergency-header text-primary-foreground px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-lg">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🇱🇧</span>
-          <div>
+      <header className="emergency-header text-primary-foreground px-4 py-3 flex items-center justify-between gap-3 sticky top-0 z-50 shadow-lg">
+        <div className="flex items-center gap-3 min-w-0">
+          <GoogleTranslate />
+          <span className="text-2xl shrink-0">🇱🇧</span>
+          <div className="min-w-0">
             <h1 className="text-lg font-bold leading-tight">Lebanon Emergency</h1>
             <p className="text-xs opacity-80">Public Relief Platform</p>
           </div>
