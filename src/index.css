@@ -121,30 +121,42 @@
   }
 }
 
-.google-translate-widget .goog-te-gadget {
-  font-family: 'DM Sans', sans-serif;
-  color: hsl(var(--primary-foreground));
-  font-size: 0;
+.google-translate-wrapper {
+  position: relative;
 }
 
-.google-translate-widget .goog-te-combo {
+.google-translate-toggle {
   border-radius: 0.5rem;
   border: none;
-  padding: 0.2rem 0.4rem;
+  padding: 0.25rem 0.55rem;
   background-color: rgba(255, 255, 255, 0.15);
   color: hsl(var(--primary-foreground));
   font-size: 0.75rem;
+  font-weight: 600;
   backdrop-filter: blur(4px);
+  transition: background-color 0.2s ease;
 }
 
-.google-translate-widget .goog-te-combo:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.4);
+.google-translate-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.google-translate-toggle:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.45);
   outline-offset: 1px;
 }
 
+.google-translate-widget {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.google-translate-widget .goog-te-gadget,
+.google-translate-widget .goog-te-combo,
 .google-translate-widget .goog-logo-link,
 .google-translate-widget .goog-te-gadget span {
-  display: none;
+  display: none !important;
 }
 
 .goog-te-banner-frame.skiptranslate {
