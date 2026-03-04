@@ -1,3 +1,5 @@
+import { Language } from '@/context/LanguageContext';
+
 export type ShelterStatus = 'available' | 'limited' | 'full';
 
 export interface Shelter {
@@ -19,17 +21,7 @@ export interface Shelter {
   createdAt: string;
 }
 
-export type HelpType =
-  | 'transport'
-  | 'medicine'
-  | 'food'
-  | 'shelter'
-  | 'elderly'
-  | 'baby'
-  | 'blood'
-  | 'disability'
-  | 'medical'
-  | 'other';
+export type HelpType = 'transport' | 'medicine' | 'food' | 'shelter' | 'elderly' | 'baby' | 'blood' | 'disability' | 'medical' | 'other';
 
 export interface HelpRequest {
   id: string;
@@ -43,16 +35,7 @@ export interface HelpRequest {
   createdAt: string;
 }
 
-export type DonationType =
-  | 'food'
-  | 'water'
-  | 'medicine'
-  | 'shelter'
-  | 'transport'
-  | 'financial'
-  | 'blood'
-  | 'clothes'
-  | 'other';
+export type DonationType = 'food' | 'water' | 'medicine' | 'shelter' | 'transport' | 'financial' | 'blood' | 'clothes' | 'other';
 
 export interface Donation {
   id: string;
@@ -67,33 +50,42 @@ export interface Donation {
   createdAt: string;
 }
 
-export const HELP_TYPE_CONFIG: Record<HelpType, { emoji: string; label: string }> = {
-  transport: { emoji: '🚗', label: 'Transport' },
-  medicine: { emoji: '💊', label: 'Medicine' },
-  food: { emoji: '🍲', label: 'Food' },
-  shelter: { emoji: '🏠', label: 'Temporary Shelter' },
-  elderly: { emoji: '🧓', label: 'Elderly Assistance' },
-  baby: { emoji: '🍼', label: 'Baby Supplies' },
-  blood: { emoji: '🩸', label: 'Blood Request' },
-  disability: { emoji: '🧑‍🦽', label: 'Disability Support' },
-  medical: { emoji: '🏥', label: 'Medical Assistance' },
-  other: { emoji: '📋', label: 'Other' },
+interface LocalizedLabel {
+  emoji: string;
+  en: string;
+  ar: string;
+}
+
+export const HELP_TYPE_CONFIG: Record<HelpType, LocalizedLabel> = {
+  transport: { emoji: '🚗', en: 'Transport', ar: 'نقل' },
+  medicine: { emoji: '💊', en: 'Medicine', ar: 'دواء' },
+  food: { emoji: '🍲', en: 'Food', ar: 'طعام' },
+  shelter: { emoji: '🏠', en: 'Temporary Shelter', ar: 'مأوى مؤقت' },
+  elderly: { emoji: '🧓', en: 'Elderly Assistance', ar: 'مساعدة كبار السن' },
+  baby: { emoji: '🍼', en: 'Baby Supplies', ar: 'مستلزمات أطفال' },
+  blood: { emoji: '🩸', en: 'Blood Request', ar: 'طلب دم' },
+  disability: { emoji: '🧑‍🦽', en: 'Disability Support', ar: 'دعم ذوي الإعاقة' },
+  medical: { emoji: '🏥', en: 'Medical Assistance', ar: 'مساعدة طبية' },
+  other: { emoji: '📋', en: 'Other', ar: 'أخرى' },
 };
 
-export const DONATION_TYPE_CONFIG: Record<DonationType, { emoji: string; label: string }> = {
-  food: { emoji: '🍲', label: 'Food' },
-  water: { emoji: '💧', label: 'Water' },
-  medicine: { emoji: '💊', label: 'Medicine' },
-  shelter: { emoji: '🏠', label: 'Shelter Space' },
-  transport: { emoji: '🚗', label: 'Transport' },
-  financial: { emoji: '💰', label: 'Financial Support' },
-  blood: { emoji: '🩸', label: 'Blood Donation' },
-  clothes: { emoji: '🧥', label: 'Clothes & Blankets' },
-  other: { emoji: '📦', label: 'Other' },
+export const DONATION_TYPE_CONFIG: Record<DonationType, LocalizedLabel> = {
+  food: { emoji: '🍲', en: 'Food', ar: 'طعام' },
+  water: { emoji: '💧', en: 'Water', ar: 'مياه' },
+  medicine: { emoji: '💊', en: 'Medicine', ar: 'دواء' },
+  shelter: { emoji: '🏠', en: 'Shelter Space', ar: 'مكان للإيواء' },
+  transport: { emoji: '🚗', en: 'Transport', ar: 'نقل' },
+  financial: { emoji: '💰', en: 'Financial Support', ar: 'دعم مالي' },
+  blood: { emoji: '🩸', en: 'Blood Donation', ar: 'تبرع بالدم' },
+  clothes: { emoji: '🧥', en: 'Clothes & Blankets', ar: 'ملابس وبطانيات' },
+  other: { emoji: '📦', en: 'Other', ar: 'أخرى' },
 };
 
-export const SHELTER_STATUS_CONFIG: Record<ShelterStatus, { label: string; className: string }> = {
-  available: { label: 'Available', className: 'status-available' },
-  limited: { label: 'Limited', className: 'status-limited' },
-  full: { label: 'Not Available', className: 'status-full' },
+export const SHELTER_STATUS_CONFIG: Record<ShelterStatus, { en: string; ar: string; className: string }> = {
+  available: { en: 'Available', ar: 'متاح', className: 'status-available' },
+  limited: { en: 'Limited', ar: 'محدود', className: 'status-limited' },
+  full: { en: 'Not Available', ar: 'غير متاح', className: 'status-full' },
 };
+
+export const getLocalizedLabel = (label: { en: string; ar: string }, language: Language) =>
+  language === 'ar' ? label.ar : label.en;

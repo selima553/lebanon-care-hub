@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/context/AppContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import { Analytics } from "@vercel/analytics/react";
 import Layout from "@/components/Layout";
 import SheltersPage from "@/pages/SheltersPage";
@@ -26,7 +27,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AppProvider>
-        <BrowserRouter>
+        <LanguageProvider>
+          <BrowserRouter>
           <Layout>
             <Routes>
               <Route path="/" element={<SheltersPage />} />
@@ -44,6 +46,7 @@ const App = () => (
             </Routes>
           </Layout>
         </BrowserRouter>
+        </LanguageProvider>
       </AppProvider>
       <Analytics />
     </TooltipProvider>
