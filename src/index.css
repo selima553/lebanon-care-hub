@@ -120,3 +120,37 @@
     background: var(--emergency-gradient);
   }
 }
+
+.google-translate-widget .goog-te-gadget {
+  font-family: 'DM Sans', sans-serif;
+  color: hsl(var(--primary-foreground));
+  font-size: 0;
+}
+
+.google-translate-widget .goog-te-combo {
+  border-radius: 0.5rem;
+  border: none;
+  padding: 0.2rem 0.4rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: hsl(var(--primary-foreground));
+  font-size: 0.75rem;
+  backdrop-filter: blur(4px);
+}
+
+.google-translate-widget .goog-te-combo:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 1px;
+}
+
+.google-translate-widget .goog-logo-link,
+.google-translate-widget .goog-te-gadget span {
+  display: none;
+}
+
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
