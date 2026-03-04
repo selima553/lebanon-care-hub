@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Home, HandHeart, Gift, ArrowLeft } from 'lucide-react';
+import { Home, HandHeart, Gift, ArrowLeft, Pencil } from 'lucide-react';
 
 const AddMenuPage = () => {
   const navigate = useNavigate();
@@ -25,6 +25,13 @@ const AddMenuPage = () => {
       title: 'Share a Donation',
       description: 'Offer donations or resources to those in need',
       path: '/add/donation',
+    },
+    {
+      icon: Pencil,
+      emoji: '✏️',
+      title: 'Edit My Shelter Places',
+      description: 'Manage and update the shelters you added',
+      path: '/my-shelters',
     },
   ];
 

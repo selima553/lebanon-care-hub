@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Shelter, HelpRequest, Donation } from '@/types';
 import { mockShelters, mockHelpRequests, mockDonations } from '@/data/mockData';
 
@@ -7,6 +7,7 @@ interface AppContextType {
   helpRequests: HelpRequest[];
   donations: Donation[];
   addShelter: (shelter: Shelter) => void;
+  updateShelter: (id: string, shelter: Omit<Shelter, 'id' | 'createdAt'>) => void;
   addHelpRequest: (req: HelpRequest) => void;
   addDonation: (donation: Donation) => void;
   updateShelterCommunityStatus: (id: string, status: Shelter['status'], comment?: string) => void;
@@ -21,11 +22,18 @@ export const useAppData = () => {
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [shelters, setShelters] = useState<Shelter[]>(mockShelters);
+  const [shelters, setShelters] = useState<Shelter[]>(() => {
+    const saved = localStorage.getItem('lch_shelters');
+    const initialShelters = saved ? JSON.parse(saved) as Shelter[] : mockShelters;
+    return initialShelters.map((s) => ({ ...s, pricing: s.pricing || 'free' }));
+  });
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>(mockHelpRequests);
   const [donations, setDonations] = useState<Donation[]>(mockDonations);
 
   const addShelter = (shelter: Shelter) => setShelters(prev => [shelter, ...prev]);
+  const updateShelter = (id: string, shelter: Omit<Shelter, 'id' | 'createdAt'>) => {
+    setShelters(prev => prev.map(s => (s.id === id ? { ...s, ...shelter } : s)));
+  };
   const addHelpRequest = (req: HelpRequest) => setHelpRequests(prev => [req, ...prev]);
   const addDonation = (donation: Donation) => setDonations(prev => [donation, ...prev]);
 
@@ -44,9 +52,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+
+  useEffect(() => {
+    localStorage.setItem('lch_shelters', JSON.stringify(shelters));
+  }, [shelters]);
+
   return (
     <AppContext.Provider
-      value={{ shelters, helpRequests, donations, addShelter, addHelpRequest, addDonation, updateShelterCommunityStatus }}
+      value={{ shelters, helpRequests, donations, addShelter, updateShelter, addHelpRequest, addDonation, updateShelterCommunityStatus }}
     >
       {children}
     </AppContext.Provider>

@@ -14,6 +14,7 @@ import AddShelterPage from "@/pages/AddShelterPage";
 import RequestHelpPage from "@/pages/RequestHelpPage";
 import ShareDonationPage from "@/pages/ShareDonationPage";
 import TraumaSupportPage from "@/pages/TraumaSupportPage";
+import MySheltersPage from "@/pages/MySheltersPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,8 +35,10 @@ const App = () => (
               <Route path="/trauma-support" element={<TraumaSupportPage />} />
               <Route path="/add" element={<AddMenuPage />} />
               <Route path="/add/shelter" element={<AddShelterPage />} />
+              <Route path="/add/shelter/:shelterId" element={<AddShelterPage />} />
               <Route path="/add/help" element={<RequestHelpPage />} />
               <Route path="/add/donation" element={<ShareDonationPage />} />
+              <Route path="/my-shelters" element={<MySheltersPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

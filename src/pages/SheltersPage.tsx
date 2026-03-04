@@ -2,18 +2,25 @@ import { useAppData } from '@/context/AppContext';
 import ShelterCard from '@/components/ShelterCard';
 import { Search, Map } from 'lucide-react';
 import { useState } from 'react';
+import { ShelterStatus } from '@/types';
 import { useNavigate } from 'react-router-dom';
 
 const SheltersPage = () => {
   const { shelters } = useAppData();
   const [search, setSearch] = useState('');
+  const [pricingFilter, setPricingFilter] = useState<'all' | 'free' | 'paid'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | ShelterStatus>('all');
   const navigate = useNavigate();
 
-  const filtered = shelters.filter(
-    (s) =>
+  const filtered = shelters.filter((s) => {
+    const searchMatch =
       s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.address.toLowerCase().includes(search.toLowerCase())
-  );
+      s.address.toLowerCase().includes(search.toLowerCase());
+    const effectivePricing = s.pricing || 'free';
+    const pricingMatch = pricingFilter === 'all' || effectivePricing === pricingFilter;
+    const statusMatch = statusFilter === 'all' || s.status === statusFilter;
+    return searchMatch && pricingMatch && statusMatch;
+  });
 
   return (
     <div className="px-4 py-4 space-y-4 max-w-lg mx-auto">
@@ -37,6 +44,29 @@ const SheltersPage = () => {
         </button>
       </div>
 
+      <div className="grid grid-cols-2 gap-2">
+        <select
+          value={pricingFilter}
+          onChange={(e) => setPricingFilter(e.target.value as 'all' | 'free' | 'paid')}
+          className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value="all">All pricing</option>
+          <option value="free">Free</option>
+          <option value="paid">Paid</option>
+        </select>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as 'all' | ShelterStatus)}
+          className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value="all">All statuses</option>
+          <option value="available">Available</option>
+          <option value="limited">Limited</option>
+          <option value="full">Not available</option>
+        </select>
+      </div>
+
       <p className="text-xs text-muted-foreground">{filtered.length} shelter{filtered.length !== 1 ? 's' : ''} found</p>
 
       <div className="space-y-3">
@@ -48,7 +78,7 @@ const SheltersPage = () => {
       {filtered.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <p className="text-lg">No shelters found</p>
-          <p className="text-sm mt-1">Try a different search or add a new shelter</p>
+          <p className="text-sm mt-1">Try different filters or add a new shelter</p>
         </div>
       )}
     </div>

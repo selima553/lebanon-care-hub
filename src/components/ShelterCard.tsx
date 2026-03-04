@@ -3,15 +3,18 @@ import { timeAgo } from '@/lib/helpers';
 import ContactButtons from './ContactButtons';
 import DirectionsButton from './DirectionsButton';
 import StatusBadge from './StatusBadge';
-import { MapPin, Users, Clock } from 'lucide-react';
+import { MapPin, Users, Clock, BadgeDollarSign, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { useAppData } from '@/context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ShelterCardProps {
   shelter: Shelter;
+  showEdit?: boolean;
 }
 
-const ShelterCard = ({ shelter }: ShelterCardProps) => {
+const ShelterCard = ({ shelter, showEdit = false }: ShelterCardProps) => {
+  const navigate = useNavigate();
   const { updateShelterCommunityStatus } = useAppData();
   const [showStatusUpdate, setShowStatusUpdate] = useState(false);
   const [statusComment, setStatusComment] = useState('');
@@ -44,6 +47,10 @@ const ShelterCard = ({ shelter }: ShelterCardProps) => {
           <span>Capacity: {shelter.capacity}</span>
         </div>
         <div className="flex items-center gap-2">
+          <BadgeDollarSign className="w-3.5 h-3.5 shrink-0" />
+          <span>{shelter.pricing !== 'paid' ? 'Free shelter' : `Paid (${shelter.priceAmount ?? 0})`}</span>
+        </div>
+        <div className="flex items-center gap-2">
           <Clock className="w-3.5 h-3.5 shrink-0" />
           <span>Added {timeAgo(shelter.createdAt)}</span>
         </div>
@@ -67,9 +74,18 @@ const ShelterCard = ({ shelter }: ShelterCardProps) => {
       )}
 
       <div className="pt-1 space-y-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <ContactButtons phone={shelter.phone} />
           <DirectionsButton lat={shelter.lat} lng={shelter.lng} />
+          {showEdit && (
+            <button
+              onClick={() => navigate(`/add/shelter/${shelter.id}`)}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium text-card-foreground hover:bg-accent"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </button>
+          )}
         </div>
         <button
           onClick={() => setShowStatusUpdate(!showStatusUpdate)}
