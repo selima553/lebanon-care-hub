@@ -8,7 +8,7 @@ export interface Shelter {
   phone: string;
   lat?: number;
   lng?: number;
-  capacity: number;
+  capacity: number | null;
   pricing: 'free' | 'paid';
   priceAmount?: number;
   creatorId?: string;
