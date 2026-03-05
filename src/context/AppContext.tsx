@@ -6,6 +6,7 @@ interface AppContextType {
   shelters: Shelter[];
   helpRequests: HelpRequest[];
   donations: Donation[];
+  isDataLoading: boolean;
   addShelter: (shelter: Shelter) => Promise<boolean>;
   updateShelter: (id: string, shelter: Omit<Shelter, 'id' | 'createdAt'>) => Promise<boolean>;
   addHelpRequest: (req: HelpRequest) => Promise<boolean>;
@@ -69,10 +70,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [shelters, setShelters] = useState<Shelter[]>([]);
   const [helpRequests, setHelpRequests] = useState<HelpRequest[]>([]);
   const [donations, setDonations] = useState<Donation[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
-      const [sheltersRes, helpRes, donationRes] = await Promise.all([
+      try {
+        const [sheltersRes, helpRes, donationRes] = await Promise.all([
         supabase.from('shelters').select('*').order('created_at', { ascending: false }),
         supabase.from('help_requests').select('*').order('created_at', { ascending: false }),
         supabase.from('donations').select('*').order('created_at', { ascending: false }),
@@ -86,8 +89,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setHelpRequests(helpRes.data.map(normalizeHelpRequest));
       }
 
-      if (!donationRes.error && donationRes.data) {
-        setDonations(donationRes.data.map(normalizeDonation));
+        if (!donationRes.error && donationRes.data) {
+          setDonations(donationRes.data.map(normalizeDonation));
+        }
+      } finally {
+        setIsDataLoading(false);
       }
     };
 
@@ -211,7 +217,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider
-      value={{ shelters, helpRequests, donations, addShelter, updateShelter, addHelpRequest, addDonation, updateShelterCommunityStatus }}
+      value={{ shelters, helpRequests, donations, isDataLoading, addShelter, updateShelter, addHelpRequest, addDonation, updateShelterCommunityStatus }}
     >
       {children}
     </AppContext.Provider>
