@@ -1,13 +1,13 @@
 import { useAppData } from '@/context/AppContext';
 import ShelterCard from '@/components/ShelterCard';
-import { Search, Map } from 'lucide-react';
+import { Search, Map, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { ShelterStatus } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 
 const SheltersPage = () => {
-  const { shelters } = useAppData();
+  const { shelters, isDataLoading } = useAppData();
   const { isArabic } = useLanguage();
   const [search, setSearch] = useState('');
   const [pricingFilter, setPricingFilter] = useState<'all' | 'free' | 'paid'>('all');
@@ -43,10 +43,19 @@ const SheltersPage = () => {
         </select>
       </div>
 
-      <p className="text-xs text-muted-foreground">{filtered.length} {isArabic ? 'ملجأ' : `shelter${filtered.length !== 1 ? 's' : ''}`} {isArabic ? 'موجود' : 'found'}</p>
-      <div className="space-y-3">{filtered.map((shelter) => <ShelterCard key={shelter.id} shelter={shelter} />)}</div>
+      {isDataLoading ? (
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <Loader2 className="h-7 w-7 animate-spin" />
+          <p className="text-sm mt-3">{isArabic ? 'جاري تحميل الملاجئ...' : 'Loading shelters...'}</p>
+        </div>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">{filtered.length} {isArabic ? 'ملجأ' : `shelter${filtered.length !== 1 ? 's' : ''}`} {isArabic ? 'موجود' : 'found'}</p>
+          <div className="space-y-3">{filtered.map((shelter) => <ShelterCard key={shelter.id} shelter={shelter} />)}</div>
 
-      {filtered.length === 0 && <div className="text-center py-12 text-muted-foreground"><p className="text-lg">{isArabic ? 'لا توجد ملاجئ' : 'No shelters found'}</p><p className="text-sm mt-1">{isArabic ? 'جرّب فلاتر مختلفة أو أضف ملجأ جديداً' : 'Try different filters or add a new shelter'}</p></div>}
+          {filtered.length === 0 && <div className="text-center py-12 text-muted-foreground"><p className="text-lg">{isArabic ? 'لا توجد ملاجئ' : 'No shelters found'}</p><p className="text-sm mt-1">{isArabic ? 'جرّب فلاتر مختلفة أو أضف ملجأ جديداً' : 'Try different filters or add a new shelter'}</p></div>}
+        </>
+      )}
     </div>
   );
 };

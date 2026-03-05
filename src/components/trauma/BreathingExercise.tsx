@@ -1,24 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/LanguageContext';
 
 const BREATHING_MODES = {
   '4-4-6': [
-    { key: 'inhale', label: 'Inhale slowly', duration: 4 },
-    { key: 'hold', label: 'Hold', duration: 4 },
-    { key: 'exhale', label: 'Exhale gently', duration: 6 },
+    { key: 'inhale', label: { en: 'Inhale slowly', ar: 'خذ شهيقًا ببطء' }, duration: 4 },
+    { key: 'hold', label: { en: 'Hold', ar: 'احبس النفس' }, duration: 4 },
+    { key: 'exhale', label: { en: 'Exhale gently', ar: 'ازفر بلطف' }, duration: 6 },
   ],
   box: [
-    { key: 'inhale', label: 'Inhale slowly', duration: 4 },
-    { key: 'hold-in', label: 'Hold', duration: 4 },
-    { key: 'exhale', label: 'Exhale gently', duration: 4 },
-    { key: 'hold-out', label: 'Hold', duration: 4 },
+    { key: 'inhale', label: { en: 'Inhale slowly', ar: 'خذ شهيقًا ببطء' }, duration: 4 },
+    { key: 'hold-in', label: { en: 'Hold', ar: 'احبس النفس' }, duration: 4 },
+    { key: 'exhale', label: { en: 'Exhale gently', ar: 'ازفر بلطف' }, duration: 4 },
+    { key: 'hold-out', label: { en: 'Hold', ar: 'احبس النفس' }, duration: 4 },
   ],
 } as const;
 
 type Mode = keyof typeof BREATHING_MODES;
 
 const BreathingExercise = () => {
+  const { isArabic } = useLanguage();
   const [mode, setMode] = useState<Mode>('4-4-6');
   const [isRunning, setIsRunning] = useState(false);
   const [phaseIndex, setPhaseIndex] = useState(0);
@@ -67,7 +69,6 @@ const BreathingExercise = () => {
     return () => clearInterval(tick);
   }, [isRunning, phases]);
 
-
   const phaseProgress = ((activePhase.duration - remaining) / activePhase.duration) * 100;
   const circleScale = activePhase.key.startsWith('inhale')
     ? 1 + phaseProgress / 180
@@ -75,24 +76,26 @@ const BreathingExercise = () => {
       ? 1.25 - phaseProgress / 200
       : 1.12;
 
+  const activeLabel = isArabic ? activePhase.label.ar : activePhase.label.en;
+
   return (
     <Card>
       <CardHeader className="space-y-3">
-        <CardTitle className="text-base">Breathing Exercise</CardTitle>
-        <div className="flex gap-2" role="group" aria-label="Breathing modes">
+        <CardTitle className="text-base">{isArabic ? 'تمرين التنفس' : 'Breathing Exercise'}</CardTitle>
+        <div className="flex gap-2" role="group" aria-label={isArabic ? 'أنماط التنفس' : 'Breathing modes'}>
           <Button
             size="sm"
             variant={mode === '4-4-6' ? 'default' : 'outline'}
             onClick={() => setMode('4-4-6')}
           >
-            4-4-6 Breathing
+            {isArabic ? 'تنفس ٤-٤-٦' : '4-4-6 Breathing'}
           </Button>
           <Button
             size="sm"
             variant={mode === 'box' ? 'default' : 'outline'}
             onClick={() => setMode('box')}
           >
-            Box Breathing
+            {isArabic ? 'تنفس الصندوق' : 'Box Breathing'}
           </Button>
         </div>
       </CardHeader>
@@ -106,17 +109,17 @@ const BreathingExercise = () => {
               transitionDuration: prefersReducedMotion ? '0ms' : '1000ms',
             }}
           >
-            <span className="text-sm font-medium text-foreground">{activePhase.label}</span>
+            <span className="text-sm font-medium text-foreground">{activeLabel}</span>
           </div>
         </div>
 
         <p className="text-center text-sm text-muted-foreground" aria-live="polite">
-          {remaining}s • {activePhase.label}
+          {remaining}{isArabic ? 'ث' : 's'} • {activeLabel}
         </p>
 
         <div className="flex gap-2 justify-center">
-          <Button onClick={() => setIsRunning((v) => !v)} aria-label={isRunning ? 'Stop breathing timer' : 'Start breathing timer'}>
-            {isRunning ? 'Stop' : 'Start'}
+          <Button onClick={() => setIsRunning((v) => !v)} aria-label={isRunning ? (isArabic ? 'إيقاف مؤقت التنفس' : 'Stop breathing timer') : (isArabic ? 'بدء مؤقت التنفس' : 'Start breathing timer')}>
+            {isRunning ? (isArabic ? 'إيقاف' : 'Stop') : (isArabic ? 'ابدأ' : 'Start')}
           </Button>
         </div>
       </CardContent>
