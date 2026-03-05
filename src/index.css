@@ -149,3 +149,7 @@
 body.rtl {
   direction: rtl;
 }
+
+html[lang='ar'] {
+  font-size: 17px;
+}
